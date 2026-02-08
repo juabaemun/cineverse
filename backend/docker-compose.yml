@@ -1,0 +1,12 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: cineverse-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: cineverse_db
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: cine
+      MYSQL_PASSWORD: verse
+    ports:
+      - "3306:3306"
