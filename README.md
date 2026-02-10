@@ -246,6 +246,7 @@ cd DESPLIEGUE_CINEVERSE
 sudo docker-compose up --build -d
 ```
 
+
 ### 3: Fuerza el inicio de la base de datos
 
 Accede a IP pública de la instancia EC2 con un navegador para que se inicie el backend por primera vez y genere la base de datos MySQL
@@ -266,7 +267,138 @@ VALUES ('admin', '$2a$10$HB.i844KLiZ.CUnktHSN8uhRSn//ECz7WxHMLIiqILJnoKOc3GHuG',
 
 ### 5: Primer inicio de sesión con el usuario creado
 
-Nos conectamos con el navegador a IP Pública de la instancia EC2 y ya podremos hacer login para acceder al frontend.
+Nos conectamos con el navegador a IP Pública de la instancia EC2 y ya podremos hacer login para acceder al frontend (usuario: el email de la cuenta).
 
 
 ![](images/login_Admin.png)
+
+
+## 🚢 Funcionalidades de la aplicación web (Frontend + Backend) 
+
+### 1: Perfil Administrador
+
+#### 1: Menús/Pestañas de la página principal
+
+Películas
+![](images/adminPeliculas.png)
+
+Usuarios
+![](images/adminUsuarios.png)
+
+Salas
+![](images/adminSalas.png)
+
+Sesiones
+![](images/adminSesiones.png)
+
+
+
+#### 2: Crear/Modificar/Eliminar películas
+
+Ejemplo de creación de película:
+
+Paso 1: Pulsamos el botón
+![](images/adminNuevaPelicula1.png) 
+
+
+Paso 2: Completamos los datos de la película (para la imagen indicamos una URL válida)
+![](images/adminNuevaPelicula2.png) 
+
+Paso 3: Pulsamos Aceptar y observamos que ta se ha creado la película
+![](images/adminNuevaPelicula3.png) 
+
+
+
+Ejemplo de eliminación de película:
+
+
+#### 3: Importación de películas con Swapi
+
+Paso 1: Pulsamos el botón
+![](images/adminImportarPeliculas1.png) 
+
+
+Paso 2: Se realiza la importaciín y se confirma con un mensaje emergente
+![](images/adminImportarPeliculas2.png) 
+
+
+
+#### 4: Crear/Modificar/Eliminar usuarios
+
+Ejemplo de creación de usuario:
+
+
+Ejemplo de eliminación de usuario
+
+
+#### 5: Crear/Modificar/Eliminar salas
+
+Ejemplo de creación de sala:
+
+
+Ejemplo de eliminación de sala:
+
+
+#### 6: Crear/Modificar/Eliminar sesiones
+
+Ejemplo de creación de sesión:
+
+
+Ejemplo de eliminación de sesión
+
+
+### 2: Perfil Empleado
+
+#### 1: Menús/Pestañas de la página principal
+
+Taquílla
+
+
+Validar Acceso
+
+
+Chat Soporte
+
+
+
+#### 2: Venta de entradas
+
+
+#### 3: Validación de acceso a la sesión
+
+
+#### 4: Chat Soporte
+
+
+### 3: Perfil Cliente
+
+#### 1: Menús/Pestañas de la página principal
+
+Taquílla
+
+
+Validar Acceso
+
+
+Chat Soporte
+
+
+
+#### 2: Compra de entradas
+
+
+
+#### 4: Chat Soporte
+
+
+## 🚢 Funcionalidades de la aplicación movil 
+
+### 1: Compra de entradas
+
+
+
+### 2: Entradas compradas
+
+
+
+### 3: Chat Soporte
