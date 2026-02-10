@@ -250,6 +250,8 @@ sudo docker-compose up --build -d
 
 Accede a IP pública de la instancia EC2 con un navegador para que se inicie el backend por primera vez y genere la base de datos MySQL
 
+![](images/login.png)
+
 
 ### 4: Crea un usuario de administración para poder enpezar a usar la aplicación (crear usuarios, sesiones, ...)
 
@@ -265,3 +267,6 @@ VALUES ('admin', '$2a$10$HB.i844KLiZ.CUnktHSN8uhRSn//ECz7WxHMLIiqILJnoKOc3GHuG',
 ### 5: Primer inicio de sesión con el usuario creado
 
 Nos conectamos con el navegador a IP Pública de la instancia EC2 y ya podremos hacer login para acceder al frontend.
+
+
+![](images/login_Admin.png)
