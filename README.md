@@ -19,20 +19,23 @@
 ## 🛠️ Stack Tecnológico
 
 ### Backend
+
 * **Lenguaje:** Java 17[cite: 117].
 * **Framework:** Spring Boot 3.x (Clean Architecture).
 * **Seguridad:** Spring Security + JWT (JSON Web Tokens) para arquitectura stateless.
 * **Base de Datos:** MySQL 8.0 (Persistencia centralizada).
 * **Integración:** Cliente de red interno para consumo de SWAPI (Star Wars API).
 * **Chat en tiempo real:** Uso de Websockets para el chat de soporte en tiempo real.
-* **IDE de desarrollo utilizado:** IntelliJ IDEA 
+* **IDE de desarrollo utilizado:** IntelliJ IDEA
 
 ### Frontend (Web Admin)
+
 * **Framework:** React.
 * **Estilos:** Tailwind CSS (Diseño responsive).
 * **IDE de desarrollo utilizado:** Visual Studio Code
 
 ### Mobile
+
 * **Lenguaje:** Kotlin.
 * **UI:** Jetpack Compose (Interfaz declarativa).
 * **Red:** Retrofit 2 + OkHttp + Coil (con interceptores de User-Agent).
@@ -44,7 +47,9 @@
 ## 🔧 Compilación de todos los elementos y preparación del despliegue
 
 ### 1. Compilación del Backend (Spring Boot)
+
 Requiere JDK 17 y Maven instalado.
+
 ```bash
 # Acceder a la carpeta del backend
 cd backend
@@ -54,7 +59,9 @@ cd backend
 ```
 
 ### 2. Compilación del Frontend (Web)
+
 Requiere Node.js y npm.
+
 ```bash
 # Acceder a la carpeta del frontend
 cd frontend
@@ -65,6 +72,7 @@ npm install stompjs sockjs-client
 # Compilar y generar el frontend completo
 npm run build
 ```
+
 La carpeta dist/ contendrá los archivos estáticos listos para ser servidos por Nginx.
 
 ### 3. App Móvil (Android Studio)
@@ -77,9 +85,11 @@ Generar el APK: Build > Build Bundle(s) / APK(s) > Build APK(s).
 ### 4. Dockerización del Sistema y ficheros de configuración
 
 #### 4.1. Ficheros Dockerfile
+
 Como vamos a desplegar el sistema en Docker, generaremos dos ficheros Dockerfile (uno para el Backend y otro para el Frontend) que usaremos más tarde
 
 Dockerfile para el Backend (Dockerfile.backend)
+
 ```bash
 FROM eclipse-temurin:17-jdk-alpine
 COPY cineverse-api-0.0.1-SNAPSHOT.jar app.jar
@@ -88,6 +98,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 ```
 
 Dockerfile para el Frontend (Dockerfile.frontend)
+
 ```bash
 FROM nginx:alpine
 # Copiamos la carpeta dist y el config personalizado
@@ -98,8 +109,10 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 #### 4.2. Configuración Servicio Web
+
 Como durante el despliegue levantaremos un servidor nginx en el contenedor, también necesitaremos el fichero de configuración de este servcios
 Fichero de configuración de nginx (nginx.conf)
+
 ```bash
 server {
     listen 80;
@@ -140,7 +153,9 @@ server {
 ```
 
 #### 4.3. Fichero de orquestación para Docker:
+
 Para que docker sepa que contenedores crear, también prepararemos el fichero docker-compose.yml
+
 ```bash
 version: '3.8'
 
@@ -212,6 +227,7 @@ networks:
 ```
 
 ### 5. Preparación de carpeta para el despliegue
+
 Prepararemos una carpeta con todos los ficheros generados (compillación y ficheros de configuración) lista para subir al servidor de producción. La carpeta Despliegue_Cineverse de este repositorio alberga los ficheros resultantes de la compilación junto a los ficheros de configuración, lista para usarse cono fuente del despliegue que se detalla a continuación.
 
 ## 🚢 Despliegue en Producción (AWS + Docker + Nginx)
@@ -225,9 +241,11 @@ Lanzar una instancia Ubuntu Server en AWS EC2.
 Configurar el Security Group permitiendo los puertos 80 (HTTP), 8080 (API) y 22 (SSH).
 
 Realizar una conexión por SSH a la instancia EC2 y instalar Docker y Docker Compose:
+
 ```bash
 sudo apt install docker.io docker-compose -y
 sudo systemctl start docker
+sudo systemctl enable docker
 sudo usermod -aG docker $USER
 ```
 
@@ -236,16 +254,17 @@ Cierra la conexión SSH y vuelve a entrar para aplicar permisos
 ### 2: Subida a producción de la carpeta de despliegue
 
 Subir la carpeta de despliegue con el comando scp. A modo de ejemolo (indica tu fichero de claves y la IP pública de la instancia EC2):
+
 ```bash
 scp -i "tu-llave.pem" -r ./DESPLIEGUE_CINEVERSE ubuntu@DIRECCION-IP-AWS:/home/ubuntu/
 ```
 
 Realizamos una conexión SSH a la instancia Ec2, entramos en la carpeta creada y lanzamos Docker:
+
 ```bash
 cd DESPLIEGUE_CINEVERSE
 sudo docker-compose up --build -d
 ```
-
 
 ### 3: Fuerza el inicio de la base de datos
 
@@ -253,10 +272,10 @@ Accede a IP pública de la instancia EC2 con un navegador para que se inicie el 
 
 ![](images/login.png)
 
-
 ### 4: Crea un usuario de administración para poder enpezar a usar la aplicación (crear usuarios, sesiones, ...)
 
 Realizamos una conexión SSH a la instancia Ec2 y nos conectamos a MySQL para crear un usuario con permisos de Asministración:
+
 ```bash
 # Nos conectamos al servicio MySQL en docker
 sudo docker exec -it cineverse-db mysql -u root -p admin cineverse
@@ -269,136 +288,294 @@ VALUES ('admin', '$2a$10$HB.i844KLiZ.CUnktHSN8uhRSn//ECz7WxHMLIiqILJnoKOc3GHuG',
 
 Nos conectamos con el navegador a IP Pública de la instancia EC2 y ya podremos hacer login para acceder al frontend (usuario: el email de la cuenta).
 
-
 ![](images/login_Admin.png)
 
+## 🚢 Funcionalidades de la aplicación web (Frontend + Backend)
 
-## 🚢 Funcionalidades de la aplicación web (Frontend + Backend) 
+A continuación se describen las funcionalidades de la aplicación web, partiendo de la existencia de 3 tipos de perfiles o roles: Administrador, Empleado y Cliente. Veamos las funcionalidades separadas por cada perfil:
 
 ### 1: Perfil Administrador
 
-#### 1: Menús/Pestañas de la página principal
+#### 1.1: Menús/Pestañas de la página principal
 
-Películas
+**Pestaña Películas**
+
+En esta pestaña el administrador puede administrar las películas e importar películas con SWAPI
 ![](images/adminPeliculas.png)
 
-Usuarios
+**Pestaña Usuarios**
+
+En esta pestaña el administrador puede administrar los usuarios del sistema
 ![](images/adminUsuarios.png)
 
-Salas
+**Pestaña Salas**
+
+En esta pestaña el administrador puede administrar las salas del cine
 ![](images/adminSalas.png)
 
-Sesiones
+**Pestaña Sesiones**
+
+En esta pestaña el administrador puede administrar/programar las sesiones del cine
 ![](images/adminSesiones.png)
 
+#### 2: Funcionalidad de Crear/Modificar/Eliminar películas
 
+**Ejemplo de creación de película:**
 
-#### 2: Crear/Modificar/Eliminar películas
+* Paso 1: Pulsamos el botón
+  ![](images/adminNuevaPelicula1.png)
+* Paso 2: Completamos los datos de la película (para la imagen indicamos una URL válida)
+  ![](images/adminNuevaPelicula2.png)
+* Paso 3: Pulsamos Aceptar y observamos que ta se ha creado la película
+  ![](images/adminNuevaPelicula3.png)
 
-Ejemplo de creación de película:
+**Ejemplo de eliminación de película:**
 
-Paso 1: Pulsamos el botón
-![](images/adminNuevaPelicula1.png) 
+Si pulsamos en el botón rojo Borrar se mostrará un mensaje emergente solciitando confirmación:
 
+![](images/adminBorrarPelicula.png)
 
-Paso 2: Completamos los datos de la película (para la imagen indicamos una URL válida)
-![](images/adminNuevaPelicula2.png) 
+#### 3: Funcionalidad de Importación de películas con Swapi
 
-Paso 3: Pulsamos Aceptar y observamos que ta se ha creado la película
-![](images/adminNuevaPelicula3.png) 
+* Paso 1: Pulsamos el botón
+  ![](images/adminImportarPeliculas1.png)
+* Paso 2: Se realiza la importaciín y se confirma con un mensaje emergente
+  ![](images/adminImportarPeliculas2.png)
 
+#### 4: Funcionalidad de Crear/Modificar/Eliminar usuarios
 
+**Ejemplo de creación de usuario:**
 
-Ejemplo de eliminación de película:
+* Paso 1: Pulsamos el botón:
+  ![](images/adminNuevoUsuario1.png)
+* Paso 2: Rellenamos los datos de usuario teniendo en cuenta que podemos elegir el perfil/rol (Admin/Empleado/Cliente):
+  ![](images/adminNuevoUsuario2.png)
+* Paso 3: Observamos que el usuario se ha creado (en este caso con rol empleado) y ya podríamos hacer login con el:
+  ![](images/adminNuevoUsuario3.png)
 
+#### 5: Funcionalidad de Crear/Modificar/Eliminar salas
 
-#### 3: Importación de películas con Swapi
+**Ejemplo de creación de sala:**
 
-Paso 1: Pulsamos el botón
-![](images/adminImportarPeliculas1.png) 
+* Paso 1: Pulsamos el botón:
+  ![](images/adminNuevaSala1.png)
+* Paso 2: Rellenamos los datos de la sala, indicando su tamaño por filas y columnas:
+  ![](images/adminNuevaSala2.png)
+* Paso 3: Observamos que la sala se ha creado y ya podríamos usarla para programar sesiones:
+  ![](images/adminNuevaSala3.png)
 
+**Ejemplo de eliminación de sala:**
 
-Paso 2: Se realiza la importaciín y se confirma con un mensaje emergente
-![](images/adminImportarPeliculas2.png) 
+Si pulsamos en el botón rojo Borrar de sala que acabamos de crear se mostrará un mensaje emergente solciitando confirmación:
 
+![](images/adminBorrarSala1.png)
 
+A continuación podemos comprobar que la sala se ha eliminado:
 
-#### 4: Crear/Modificar/Eliminar usuarios
-
-Ejemplo de creación de usuario:
-
-
-Ejemplo de eliminación de usuario
-
-
-#### 5: Crear/Modificar/Eliminar salas
-
-Ejemplo de creación de sala:
-
-
-Ejemplo de eliminación de sala:
-
+![](images/adminBorrarSala2.png)
 
 #### 6: Crear/Modificar/Eliminar sesiones
 
-Ejemplo de creación de sesión:
+**Ejemplo de creación de sesión:**
 
+* Paso 1: Pulsamos el botón:
+  ![](images/adminNuevaSesion1.png)
+* Paso 2: Rellenamos los datos de la sesión, indicando la película, la sala, la fecha y la hora, y el precio de la entrada:
+  ![](images/adminNuevaSesion2.png)
+* Paso 3: Observamos que la sesión se ha creado y ya podríamos vender entradas de la misma:
+  ![](images/adminNuevaSala3.png)
 
-Ejemplo de eliminación de sesión
+**Ejemplo de conflicto durante la creación de sesión:**
 
+Si intentamos crear otra sesión que ocupe una sala ya ocupada, aunque sea a mitad de la proyección de la película:
+![](images/adminNuevaSesionConflicto1.png)
+
+Se mostrará un mensaje indicando que la sala ya está ocupada:
+![](images/adminNuevaSesionConflicto2.png)
 
 ### 2: Perfil Empleado
 
 #### 1: Menús/Pestañas de la página principal
 
-Taquílla
+**Taquílla**
 
+![](images/empleadoTaquilla1.png)
 
-Validar Acceso
+Y si entramos al detalle de una sesión podemos ver el tamaño de la sala y las butacas ocupadas, además de vender entradas:
 
+![](images/empleadoTaquilla2.png)
 
-Chat Soporte
+**Validación de entradas**
 
+![](images/empleadoValidar1.png)
 
+Y si entramos en una sesión podemos ver las entradas vendidas y validarlas para controlar el acceso a la sala:
+
+![](images/empleadoValidar2.png)
+
+**Chat de soporte**
+
+![](images/empleadoChat.png)
 
 #### 2: Venta de entradas
 
+**Ejemplo de venta de entradas:**
+
+* Paso 1: Pulsamos en la sesión de la que queremos vender entradas:
+  ![](images/empleadoVentaEntradas1.png)
+* Paso 2: Seleccionamos los asientos y pulsamos el botón Cobrar y Entregar:
+  ![](images/empleadoVentaEntradas2.png)
+* Paso 3: Observamos que ahora los asientos están ocupados y las entradas listas para validar:
+  ![](images/empleadoVentaEntradas3.png)
+
+  ![](images/empleadoVentaEntradas4.png)
+* Paso 4: Imprime el ticket con QR que le validarán a la entrada de la sesión:
+
+  ![](images/empleadoTicket.png)
 
 #### 3: Validación de acceso a la sesión
 
+**Ejemplo de la validación (control de acceso) de las entradas seleccionadas anteriormente**
+
+El empleado valida las entradas que le muestra el usuario pulsando en el botón validar de cada una de ellas:
+
+![](images/empleadoVentaEntradas4.png)
+
+![](images/empleadoValidarEntradas1.png)
 
 #### 4: Chat Soporte
 
+El empleado accede a la pestaña de Chat esperando mensajes:
+
+![](images/empleadoChat.png)
+
+Varios clientes contactan con el soporte enviando un mensaje:
+
+![](images/empleadoChat1.png)
+
+![](images/empleadoChat2.png)
+
+![](images/empleadoChat3.png)
+
+El empleado puede responder a cada cliente de forma individual:
+
+![](images/empleadoChat4.png)
+
+![](images/empleadoChat5.png)
+
+Y los clientes pueden recibir sus mensajes:
+
+![](images/empleadoChat6.png)
+
+![](images/empleadoChat7.png)
 
 ### 3: Perfil Cliente
 
 #### 1: Menús/Pestañas de la página principal
 
-Taquílla
+**Cartelera y compra**
 
+Puede visualizar las películas en cartelera y las entradas compradas:
 
-Validar Acceso
+![](images/clienteCartelera1.png)
 
+Pulsando sobre el botón descargar de cada entrada puede descargarla con un código QR incluido:
 
-Chat Soporte
+![](images/clienteCartelera2.png)
 
+**Chat Soporte**
 
+![](images/clienteChat.png)
 
 #### 2: Compra de entradas
 
+**Ejemplo de compra de entradas:**
 
+* Paso 1: Pulsamos en la sesión de la que queremos comprar entradas:
+  ![](images/clienteCompra1.png)
+* Paso 2: Seleccionamos los asientos y pulsamos el botón Finalizar compra:
+  ![](images/clienteCompra2.png)
+* Paso 3: Observamos que ahora que ya disponemos de las entradas y podemos decargarlas:
+  ![](images/clienteCompra3.png)
 
-#### 4: Chat Soporte
+  Si otro cliente quiere comprar entradas para la misma sesión podrá comprobar que hay butacas ocupadas
 
+  ![](images/clienteCompra4.png)
 
-## 🚢 Funcionalidades de la aplicación movil 
+#### 3: Chat Soporte
 
-### 1: Compra de entradas
+Ver ejemplo del chat desde el perfil del empleado.
 
+## 🚢 Funcionalidades de la aplicación movil
 
+### 1: Identificación
 
-### 2: Entradas compradas
+Cuando la aplicación movil inicia comprueba si puede acceder al servicio de backend, si no es posible se muestra un mensaje emergente que solicita la IP del servicio:
 
+![](images/movilInicio.png)
 
+A continuación solicita la identificación de usuario:
 
-### 3: Chat Soporte
+![](images/moviLogin1.png)
+
+### 2: Registro de usuario
+
+Si no tenemos cuenta, podemos registranos en la aplicación pulsando sobre la leyenda **"¿No tienes cuenta? Crea una"** de la pantalla de login:
+
+![](images/movilRegistro.png)
+
+Una vez completado el registro nos redirecciona a la pantalla de login con las credenciales el usuario registrado:
+
+![](images/movilRegistro2.png)
+
+### 3: Compra de entradas
+
+Después de identificarnos en la aplicación podremos seleccionar una sesión y comprar entradas:
+
+![](images/movilPeliculas.png)
+
+Pulsamos sobre una de las sesiones y podremos seleccionar las butacas libres:
+
+![](images/movilCompra1.png)
+
+Seleccionamos las entradas y las compramos:
+
+![](images/movilCompra2.png)
+
+Pulsamos el botón reservar y directamente nos mostrará las entradas compradas con el QR listo para validar:
+
+![](images/movilCompra3.png)
+
+### 4: Entradas compradas
+
+Pulsando sobre el icono de la derecha el usuario puede ver sus entradas:
+
+![](images/movilmenuEntradas.png)
+
+![](images/movilCompra3.png)
+
+### 5: Chat Soporte
+
+Pulsando sobre el icono del sobre el usuario puede ver sus entradas:
+
+![](images/movilmenuChat.png)
+
+![](images/movilChat1.png)
+
+El usuario puede enviar un mensaje a soporte:
+
+![](images/movilChat2.png)
+
+![](images/movilChat3.png)
+
+El empleado conectado puede verlo y responderlo:
+
+![](images/movilChat4.png)
+
+![](images/movilChat5.png)
+
+### 5: Chat Soporte
+
+Pulsando sobre el icono de la parte izquierda el usuario puede ver sus entradas:
+
+![](images/movilLogout.png)
